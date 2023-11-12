@@ -1,8 +1,7 @@
 "use strict";
-import { map } from "leaflet";
 import "./style.css";
 import { uid } from "uid";
-
+import Toastify from "toastify-js";
 const containerWorkouts = document.querySelector(".workouts");
 const form = document.querySelector(".form");
 const inputType = document.querySelector(".form__input--type");
@@ -10,7 +9,6 @@ const inputDistance = document.querySelector(".form__input--distance");
 const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
-const saveBtn = document.querySelector(".form__btn");
 
 class Workout {
 	date = new Date();
@@ -220,7 +218,25 @@ class App {
 		if (editBtn) {
 			this._editWorkout(workout);
 		} else if (deleteBtn) {
-			this._deleteWorkout(workout);
+			console.log("delete btn clicked!");
+			if (confirm("Are you sure want to delete?")) {
+				this._deleteWorkout(workout);
+				Toastify({
+					text: "Deleted successfully..",
+					duration: 3000,
+					destination: "https://github.com/apvarun/toastify-js",
+					newWindow: true,
+					close: true,
+					gravity: "top", // `top` or `bottom`
+					position: "center", // `left`, `center` or `right`
+					stopOnFocus: true, // Prevents dismissing of toast on hover
+					style: {
+						background: "orangered",
+						fontSize: "1.5rem",
+					},
+					onClick: function () {}, // Callback after click
+				}).showToast();
+			}
 		}
 	}
 
@@ -338,7 +354,9 @@ class App {
 
 				<div class="edit__workout">
 					<a class="btn editBtn" data-id="${workout?.uid}">Edit</a>
-					<a class="btn deleteBtn" data-id="${workout?.uid}">Delete</a>
+					<a class="btn deleteBtn" data-micromodal-trigger="modal-1" data-id="${
+						workout?.uid
+					}">Delete</a>
 				</div>
         	</li>`;
 
@@ -356,7 +374,9 @@ class App {
 				</div>
 				<div class="edit__workout">
 					<a class="btn editBtn" data-id="${workout?.uid}">Edit</a>
-					<a class="btn deleteBtn" data-id="${workout?.uid}">Delete</a>
+					<a class="btn deleteBtn" data-micromodal-trigger="modal-1" data-id="${
+						workout?.uid
+					}">Delete</a>
 				</div>
     		</li>`;
 
@@ -393,12 +413,14 @@ class App {
 		if (!data) return;
 		const parsedData = JSON.parse(data);
 		// retrieved parsed objects from local storage loose its prototype chain. Merge class with parsed objects.
+
 		const persist_Objs_Proto = parsedData.map((workout) => {
 			console.log(workout);
 			if (workout.type === "running") return structuredClone(workout);
 			else if (workout.type === "cycling") return structuredClone(workout);
 			else return workout;
 		});
+
 		this.#workouts = persist_Objs_Proto;
 
 		console.log(parsedData);
